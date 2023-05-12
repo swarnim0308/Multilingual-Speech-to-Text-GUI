@@ -1,83 +1,75 @@
-from tkinter import *
-
-##########################################################################
-import speech_recognition as SRG
-#Speech to Text conversion. Moreover, it supports various offline/online speech recognition engines and APIs.
+import tkinter as tk
+import speech_recognition as sr
 import time
-###########################################################################
 
-root = Tk()
-# Code to add widget will go here……..
-root.geometry("600x500")
-def sel():
+class SpeechToTextApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.geometry("600x500")
+        self.language_var = tk.IntVar()
+        self.label1 = None
+        self.label2 = None
+        self.label = None
 
-    s=str(ivar.get())
-    if s == '1':
-        selection = "You selected the option English"
-        label.config(text=selection)
-        english()
-    else:
-        selection = "You selected the option Hindi"
-        label.config(text=selection)
-        hindi()
+        self.create_widgets()
 
-ivar = IntVar()
-R1 = Radiobutton(root, text="English", variable=ivar, value=1,
-                  command=sel,width=10,height=5)
-R1.pack( anchor = W )
+    def create_widgets(self):
+        # Label to display status or messages
+        self.label = tk.Label(self.root, font=("Arial", 14, "bold"))
+        self.label.pack()
 
-R2 = Radiobutton(root, text="Hindi", variable=ivar, value=2,
-                  command=sel,width=10,height=5)
-R2.pack( anchor = W )
+        # Label to display text converted from audio
+        self.label1 = tk.Label(self.root, font=("Arial", 12))
+        self.label1.pack()
 
-def english():
-    print("english")
-    var = SRG.Recognizer()
-    # to take the input in the audio format and recognize the sound
-    with SRG.Microphone() as source:  # to fetch the audio from the microphone.
-        audio_input = var.record(source, duration=8)
-        print("Recording time:", time.strftime("%I:%M:%S"))
-    try:
-        text_output = var.recognize_google(audio_input)
-    except:
-        print("Couldn't process the audio input.")
+        # Label to display the converted text
+        self.label2 = tk.Label(self.root, font=("Arial", 12), wraplength=500, justify=tk.LEFT)
+        self.label2.pack()
 
-    label1.config(text=":::::::::::::::::::Text converted from audio:::::::::::::::\n")
-    label2.config(text=text_output)
-    label.config(text="_____________________Thank You :)________________________")
+        # Instruction label
+        instruction_label = tk.Label(self.root, text="Choose a language and speak", font=("Arial", 14))
+        instruction_label.pack(pady=20)
 
+        # English language selection button
+        english_btn = tk.Radiobutton(self.root, text="English", variable=self.language_var, value=1,
+                                     command=self.recognize_speech, font=("Arial", 12))
+        english_btn.pack(anchor=tk.W)
 
-    print(text_output)
-    print("Execution time:", time.strftime("%I:%M:%S"))
+        # Hindi language selection button
+        hindi_btn = tk.Radiobutton(self.root, text="Hindi", variable=self.language_var, value=2,
+                                   command=self.recognize_speech, font=("Arial", 12))
+        hindi_btn.pack(anchor=tk.W)
 
+    def recognize_speech(self):
+        # Determine the selected language based on the language_var value
+        language = 'en-US' if self.language_var.get() == 1 else 'hi-IN'
+        
+        # Update label1 with a message
+        self.label1.config(text=":::::::::::::::::::Text converted from audio:::::::::::::::\n")
+        
+        try:
+            recognizer = sr.Recognizer()
+            with sr.Microphone() as source:
+                # Record audio from the microphone for 8 seconds
+                audio_input = recognizer.record(source, duration=8)
+                print("Recording time:", time.strftime("%I:%M:%S"))
+            
+            # Use Google Speech Recognition to convert audio to text
+            text_output = recognizer.recognize_google(audio_input, language=language)
+            
+            # Update label2 with the converted text
+            self.label2.config(text=text_output)
+            
+        except sr.UnknownValueError:
+            self.label2.config(text="Couldn't process the audio input.")
+            
+        except sr.RequestError:
+            self.label2.config(text="Could not connect to the speech recognition service.")
+        
+        # Update the status label with a message
+        self.label.config(text="_____________________Thank You :)________________________", font=("Arial", 14))
 
-def hindi():
-    var = SRG.Recognizer()
-    print("hindi")
-    text = Text(root)
-    with SRG.Microphone() as source:  # to fetch the audio from the microphone.
-        audio_input = var.record(source, duration=10)
-        print("Recording time:", time.strftime("%I:%M:%S"))
-    try:
-        text_output = var.recognize_google(audio_input, language='hi-IN')   # to take the input in the audio format and recognize the sound
-    except:
-        print("Couldn't process the audio input.")
-
-
-    label1.config(text=":::::::::::::::::::Text converted from audio:::::::::::::::\n")
-    label2.config(text=text_output)
-    label.config(text="_____________________Thank You :)________________________")
-
-    print(text_output)
-    print("Execution time:", time.strftime("%I:%M:%S"))
-label = Label(root)
-label.pack()
-label1 = Label(root)
-label1.pack()
-label2 = Label(root)
-label2.pack()
-w = Label(root, text="Choose language to Speak from Menu , Then Speak", width="90", height="45")
-w.pack()
-
-root.mainloop()
-
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = SpeechToTextApp(root)
+    root.mainloop()
