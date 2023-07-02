@@ -24,8 +24,6 @@ pip install tkinter speech_recognition
 
 python speechRecognitionGUI.py
 
-
-Replace `<filename>` with the name of the Python file that contains the code.
 3. The application window will open, displaying two labels and language selection buttons.
 4. Choose the desired language (English or Hindi) by selecting the corresponding radio button.
 5. Click on the "Choose a language and speak" label and speak into the microphone.
